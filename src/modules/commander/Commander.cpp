@@ -2633,6 +2633,18 @@ void Commander::dataLinkCheck()
 		}
 	}
 
+	// PART Flight Termination Code
+	if (_status.data_link_lost) {
+		if ((_datalink_last_heartbeat_gcs != 0)
+		     && hrt_elapsed_time(&_datalink_last_heartbeat_gcs) > (180.0f * 1_s)) {
+			_flight_termination_triggered = true;
+			_armed.force_failsafe = true;
+			mavlink_log_critical(&_mavlink_log_pub, "Critical failure detected: terminate flight\t");
+			_status_changed = true;
+		}
+
+	}
+
 	// ONBOARD CONTROLLER data link loss failsafe
 	if ((_datalink_last_heartbeat_onboard_controller > 0)
 	    && (hrt_elapsed_time(&_datalink_last_heartbeat_onboard_controller) > (_param_com_obc_loss_t.get() * 1_s))
